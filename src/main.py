@@ -8,6 +8,7 @@ from random import choices
 from matplotlib.markers import MarkerStyle
 from pathlib import Path
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+import itertools as itt
 
 
 
@@ -25,55 +26,60 @@ def get_random_image(fig_dpi=100):
         plt.imread(icon_pth, format="png"), zoom=72 / fig_dpi), idx
 
 
+def get_sample_params(min_len=8, max_len=22, n_obj_min=61, n_obj_max=100, n_plots=10):
+    """
+    generate kind of random sample params (nrows, ncols_max, n_objects)
+    :param max_len: max num of rows/cols
+    :param min_len: min num of rows/cols
+    :param n_obj_min:
+    :param n_obj_max:
+    :param n_plots:
+    :return:
+    """
+    rng = range(min_len, max_len + 1)
+    n_rows = [i for i in rng if i % 10 != 0]
+    n_cols_max = [i for i in rng if i % 10 != 0]
+    n_obj = range(n_obj_min, n_obj_max + 1)
+    triples = set()
+
+    for r in n_rows:
+        for c_max in n_cols_max[::-1]:
+            n = random.choice(n_obj)
+            triples.add((r, c_max, n))
+            if len(triples) > n_plots:
+                return triples
+    return triples
+
+
 def main():
     n_plots = 40
     fig_dpi = 100
-
-    empty = ["|", "None", None, "nothing", "none", "", " ", "_"]
-    # markers = list(m for m in MarkerStyle.markers.keys() if m not in empty)
-    n_rows = set([i for i in range(8, 22) if i % 10 != 0])
-    n_cols = set([i for i in range(8, 22) if i % 10 != 0])
-
     img_dir = Path("plots")
-    img_dir.mkdir(exist_ok=True)
+    triples = get_sample_params(n_plots=n_plots)
+    for t in triples:
+        print(t)
 
-    used = set()
-
-    for _ in range(n_plots):
+    for params in triples:
         fig = plt.figure(figsize=(18, 20), dpi=fig_dpi)
 
-        r = random.choice(list(n_rows))
-        c = random.choice(list(n_cols))
-
-        dims = (r, c)
-        while dims in used:
-            r = random.choice(list(n_rows))
-            c = random.choice(list(n_cols))
-            dims = (r, c)
-            if len(used) >= len(n_rows) * len(n_cols):
-                print("Used all possible (c, r) combinations")
-                return
-
-        used.add(dims)
-
-        # mi = choices(m_indices, k=1)[0]
-        # print(f"selected marker: {markers[mi]}")
+        r, c_max, n = params
 
         ax = fig.gca()
         assert isinstance(ax, matplotlib.axes.Axes)
         icon, icon_idx = get_random_image(fig_dpi=fig_dpi)
 
-        x2d, y2d = np.meshgrid(range(c), range(r))
+        x2d, y2d = np.meshgrid(range(c_max), range(r))
 
         ax.scatter(x2d, y2d, c="none")
 
-        for x in range(c):
-            for y in range(r):
-                icon.image.axes = ax
-                ab = AnnotationBbox(icon, (x, y),
-                                    frameon=False,
-                                    pad=0.0)
-                ax.add_artist(ab)
+        for count, (y, x) in enumerate(itt.product(reversed(range(r)), range(c_max))):
+            icon.image.axes = ax
+            ab = AnnotationBbox(icon, (x, y),
+                                frameon=False,
+                                pad=0.0)
+            ax.add_artist(ab)
+            if count >= n - 1:
+                break
 
         ax.set_axis_off()
 
@@ -91,7 +97,7 @@ def main():
                     ha="left",
                     xycoords=ax.transAxes, fontsize=30)
 
-        img = img_dir / Path(f"{r}x{c}_{icon_idx}.pdf")
+        img = img_dir / Path(f"{r}x{c_max}_{n}_{icon_idx}.pdf")
         fig.savefig(img, bbox_inches="tight")
         plt.close(fig)
 
