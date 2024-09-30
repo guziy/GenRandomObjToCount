@@ -75,11 +75,6 @@ def main():
                                     pad=0.0)
                 ax.add_artist(ab)
 
-
-        # ax.set_title(f"{r}x{c}x{mi}")
-        # ax.scatter(x, y, marker=markers[mi], s=900)
-
-
         ax.set_axis_off()
 
         instructions = """
