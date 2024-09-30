@@ -49,6 +49,10 @@ def main():
         while dims in used:
             r = random.choice(list(n_rows))
             c = random.choice(list(n_cols))
+            dims = (r, c)
+            if len(used) >= len(n_rows) * len(n_cols):
+                print("Used all possible (c, r) combinations")
+                return
 
         used.add(dims)
 
