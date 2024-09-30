@@ -26,7 +26,7 @@ def get_random_image(fig_dpi=100):
 
 
 def main():
-    n_plots = 20
+    n_plots = 40
     fig_dpi = 100
 
     empty = ["|", "None", None, "nothing", "none", "", " ", "_"]
@@ -82,9 +82,8 @@ def main():
             Approximation: ________;  Réponse: ________
             
             Indice: arranger en groupes de dix, le nombre de ces 
-            groupes vous donne le nombre de groupes (dizaines). 
-            Calculez l'approximation en utilisant 
-            seulement le nombre de dizaines.
+            groupes vous donne le nombre de dizaines. 
+            Le nombre de dizaines vous donne l'approximation.
         """
 
         ax.annotate(instructions,
